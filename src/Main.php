@@ -5,58 +5,83 @@ declare(strict_types=1);
 namespace NhanAZ\KeepItems;
 
 use pocketmine\event\Listener;
-use pocketmine\plugin\PluginBase;
 use pocketmine\event\player\PlayerDeathEvent;
+use pocketmine\plugin\PluginBase;
+use pocketmine\utils\Config;
 
-class Main extends PluginBase implements Listener
-{
+final class Main extends PluginBase implements Listener{
+	private bool $keepInventory = true;
+	private bool $messageAfterDeath = false;
+	private string $messageToPlayerAfterDeath = "§aItems in your inventory have been kept";
+	private string $messageType = "message";
+	private bool $notices = true;
 
-	protected function onEnable() : void
-	{
-		$this->getServer()->getPluginManager()->registerEvents($this, $this);
+	protected function onEnable() : void{
 		$this->saveDefaultConfig();
-		$notices = $this->getConfig()->get("Notices");
-		$keepInventory = $this->getConfig()->get("KeepInventory");
-		if ($notices == true) {
-			if ($keepInventory == true) {
-				$this->getLogger()->notice("Items in the player's inventory that will be kept after they die are enabled. Edit `KeepInventory: true` to `KeepInventory: false` in `config.yml` to disable");
-			} else {
-				$this->getLogger()->notice("Items in the player's inventory that will not be kept after they die are enabled. Edit `KeepInventory: false` to `KeepInventory: true` in `config.yml` to enable");
-			}
-		} else {
-			$this->getLogger()->warning("The notifications related to this plugin are being disabled! Edit `Notices: true` in `config.yml` to enable!");
+		$config = $this->getConfig();
+		$this->keepInventory = $this->readBooleanOption($config, "KeepInventory", true);
+		$this->messageAfterDeath = $this->readBooleanOption($config, "MessageAfterDeath", false);
+		$this->notices = $this->readBooleanOption($config, "Notices", true);
+
+		$message = $config->get("MessageToPlayerAfterDeath", $this->messageToPlayerAfterDeath);
+		if(is_string($message)){
+			$this->messageToPlayerAfterDeath = $message;
+		}else{
+			$this->getLogger()->warning("MessageToPlayerAfterDeath must be a string; using the default message.");
+		}
+
+		$messageType = $config->get("MessageType", "message");
+		if(is_string($messageType) && in_array(strtolower($messageType), ["message", "popup", "tip", "title", "subtitle", "actionbarmessage"], true)){
+			$this->messageType = strtolower($messageType);
+		}else{
+			$this->getLogger()->warning("MessageType is invalid; using message.");
+		}
+
+		$this->getServer()->getPluginManager()->registerEvents($this, $this);
+		if($this->notices){
+			$this->getLogger()->notice($this->keepInventory ? "Inventory retention on death is enabled." : "Inventory retention is disabled; other plugins may still retain inventory.");
 		}
 	}
 
-	public function PlayerDeath(PlayerDeathEvent $event)
-	{
+	public function onPlayerDeath(PlayerDeathEvent $event) : void{
+		if(!$this->keepInventory){
+			return;
+		}
+
+		$event->setKeepInventory(true);
+		if(!$this->messageAfterDeath){
+			return;
+		}
+
 		$player = $event->getPlayer();
-		$keepInventory = $this->getConfig()->get("KeepInventory");
-		$messageAfterDeath = $this->getConfig()->get("MessageAfterDeath");
-		$messageToPlayerAfterDeath = $this->getConfig()->get("MessageToPlayerAfterDeath");
-		$messageType = $this->getConfig()->get("MessageType");
-		if ($keepInventory == true) {
-			$event->setKeepInventory(true);
-			if ($messageAfterDeath == true) {
-				if ($messageType == "message") {
-					$player->sendMessage($messageToPlayerAfterDeath);
-				}
-				if ($messageType == "title") {
-					$player->sendTitle($messageToPlayerAfterDeath);
-				}
-				if ($messageType == "popup") {
-					$player->sendPopup($messageToPlayerAfterDeath);
-				}
-				if ($messageType == "tip") {
-					$player->sendTip($messageToPlayerAfterDeath);
-				}
-				if ($messageType == "actionbarmessage") {
-					$player->sendActionBarMessage($messageToPlayerAfterDeath);
-				}
-			}
-		} else {
-			$event->setKeepInventory(false);
+		switch($this->messageType){
+			case "popup":
+				$player->sendPopup($this->messageToPlayerAfterDeath);
+				break;
+			case "tip":
+				$player->sendTip($this->messageToPlayerAfterDeath);
+				break;
+			case "title":
+				$player->sendTitle($this->messageToPlayerAfterDeath);
+				break;
+			case "subtitle":
+				$player->sendTitle("", $this->messageToPlayerAfterDeath);
+				break;
+			case "actionbarmessage":
+				$player->sendActionBarMessage($this->messageToPlayerAfterDeath);
+				break;
+			default:
+				$player->sendMessage($this->messageToPlayerAfterDeath);
+				break;
 		}
 	}
 
+	private function readBooleanOption(Config $config, string $key, bool $default) : bool{
+		$value = $config->get($key, $default);
+		if(!is_bool($value)){
+			$this->getLogger()->warning($key . " must be true or false; using its default value.");
+			return $default;
+		}
+		return $value;
+	}
 }

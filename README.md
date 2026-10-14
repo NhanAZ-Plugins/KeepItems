@@ -1,7 +1,9 @@
 # KeepItems
 
-KeepItems is a legacy plugin that declares PocketMine-MP API 4.0.0. This repository is no longer the maintained version of the inventory retention plugin. Use [KeepInventory](https://github.com/NhanAZ-Plugins/KeepInventory) for Axolotl-PM 5.x.
+KeepItems is a legacy inventory-retention plugin ported to Axolotl-PM API 5.0.0. When `KeepInventory` is enabled, it sets `PlayerDeathEvent::setKeepInventory(true)`. When disabled, it leaves the event unchanged so other plugins can make their own decision.
 
-The two plugins have different configuration and behavior. Review the [KeepInventory configuration](https://github.com/NhanAZ-Plugins/KeepInventory#configuration-and-behavior) before replacing KeepItems. KeepItems has not been tested in this maintenance campaign and should not be treated as compatible with Axolotl-PM 5.x.
+The existing configuration keys remain supported: `KeepInventory`, `MessageAfterDeath`, `MessageToPlayerAfterDeath`, `MessageType`, and `Notices`. Invalid values use documented defaults. Message types are `message`, `popup`, `tip`, `title`, `subtitle`, and `actionbarmessage`.
 
-KeepItems retains its existing [GPL-3.0 license](LICENSE). The maintained successor has its own release and verification history in the [KeepInventory repository](https://github.com/NhanAZ-Plugins/KeepInventory).
+This repository is archived and is no longer the maintained inventory-retention plugin. The maintained successor is [KeepInventory](https://github.com/NhanAZ-Plugins/KeepInventory); its configuration and behavior are different, so review its [configuration guide](https://github.com/NhanAZ-Plugins/KeepInventory#configuration-and-behavior) before switching. KeepItems retains the original [GPL-3.0 license](LICENSE) and NhanAZ authorship. No new stable release is published for this retired successor project.
+
+CI runs PHPStan at maximum level and builds and inspects the PHAR against pinned Axolotl-PM 5.0.0 and 5.49.1 source revisions. It also starts the built plugin on Axolotl-PM 5.49.1. These checks verify the tested points, not every 5.x release. No connected-player death flow was tested.
