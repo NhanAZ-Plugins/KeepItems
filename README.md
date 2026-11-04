@@ -1,5 +1,16 @@
 # KeepItems
 
+Retired Axolotl-PM API 5 inventory retention plugin, superseded by KeepInventory.
+
+[![CI](https://github.com/NhanAZ-Plugins/KeepItems/actions/workflows/build.yml/badge.svg)](https://github.com/NhanAZ-Plugins/KeepItems/actions/workflows/build.yml)
+[![Latest release](https://img.shields.io/github/v/release/NhanAZ-Plugins/KeepItems)](https://github.com/NhanAZ-Plugins/KeepItems/releases/latest)
+[![License](https://img.shields.io/github/license/NhanAZ-Plugins/KeepItems)](https://github.com/NhanAZ-Plugins/KeepItems/blob/master/LICENSE)
+[![Discord](https://img.shields.io/discord/986553214889517088?label=Discord&logo=discord&logoColor=white&color=5865F2)](https://discord.gg/j2X83ujT6c)
+
+## Overview
+
+This is an experimental repository. Review its documented limitations before using it on a live server.
+
 KeepItems is a legacy inventory-retention plugin ported to Axolotl-PM API 5.0.0. When `KeepInventory` is enabled, it sets `PlayerDeathEvent::setKeepInventory(true)`. When disabled, it leaves the event unchanged so other plugins can make their own decision.
 
 The existing configuration keys remain supported: `KeepInventory`, `MessageAfterDeath`, `MessageToPlayerAfterDeath`, `MessageType`, and `Notices`. Invalid values use documented defaults. Message types are `message`, `popup`, `tip`, `title`, `subtitle`, and `actionbarmessage`.
